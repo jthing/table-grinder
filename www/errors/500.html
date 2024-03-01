@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang=en>
+ <head>
+   <meta charset="UTF-8">
+  <title>Internal Server error</title>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon"
+        href="/img/favicon.ico">
+  <link rel=stylesheet href="/style.css">
+ </head>
+ <body>
+  <header>
+   <h1>Internal Server Error</h1>
+  </header>
+  <section>
+   <nav>
+    <menu>
+    </menu>
+   </nav>
+   <article>
+     <p>An error occurred while processing your ${script-name} request.
+    <h1>Error Message</h1>
+    <pre>${error}</pre>
+    <h1>Backtrace</h1>
+    <pre>${backtrace}</pre>
+   </article>
+  </section>
+  <footer>
+   <hr>
+   <a href="http://weitz.de/hunchentoot">Hunchentoot</a> ${hunchentoot-version} running on ${lisp-implementation-type} ${lisp-implementation-version}
+  </footer>
+ </body>
+</html>

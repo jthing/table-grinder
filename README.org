@@ -1,0 +1,48 @@
+#+STARTUP: inlineimeges
+
+* Table-Grinder 
+
+This is a proof of concept that you can grind a common lisp and web interface directly from a database table.
+
++ CLOS Class interface using the postmodern dau-class interface
++ HTML Table listing the records in a table
++ HTML Form for entering and editing table entries
+
+Basically CRUD without the cruft..
+
+[[./screen.png]]
+
+** Installation
+
+Before You can use this library you need to install postgresql.
+On Ubuntu that would be:
+
+- sudo apt install postgresql.
+- sudo -u postgres psql template1
+- ALTER USER postgres with encrypted password 'your_password';
+- ADD USER 'your name' with encrypted password 'your_password';
+- CREATED DATABASE 'your_name' with owner='your_name';
+
+From the command line you can now write plain psql.
+This will log you inn as your username into the database with your name.
+Then you need to setup the program.
+  
+- Open file <install-dir>/src/test-postmodern.lisp
+  From REPL:
+  - (asdf:system-source-directory (asdf:find-system "table-grinder"))
+  Returns the directory where the source is installed.
+- Start Slime/Sly.
+- Change the entries *default-database* and *default-user* to your user.
+- Open file main.lisp and press C-c ~
+- From sly:
+  - # (pw:start-testing)
+  - # (make-sample-database)
+- In the browser open localhost:4242
+
+When you are finished type (pw:stop-testing)
+
+** Usage
+
+
+#  LocalWords:  postgresql sudo postgres psql dir src pw localhost
+#  LocalWords:  REPL CLOS png WebPage
