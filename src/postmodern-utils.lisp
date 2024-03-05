@@ -5,7 +5,7 @@
 (defpackage postmodern-utils
   (:use :cl :utils :postmodern)
   (:export
-   :table-row-names
+   :store-table :table-row-names
    :normalize-for-sql :make-list-query :database-version :list-databases :list-databases-and-sizes
    :num-records-in-database :current-database :database-exists-p :current-database-size-pretty
    :current-database-size :list-database-tables :table-size :list-all-table-sizes
@@ -534,3 +534,61 @@ either quoted or string."
   (query (:select 'oid (:as (:format-type :oid :NULL) 'typename)
 	   :from 'pg-type :where (:= 'typtype "b"))))
 
+(defun row-difference (list-1 list-2)
+  "ASSUME:  list-1 and list-2 are plists
+   ASSUME:  The plists have identical keys and differ only in value
+   NOTE:    returns value-2 if they are different
+   RETURNS: key value pairs"
+  (let ((result))
+    (loop for (name-1 value-1) on list-1 by #'cddr
+	  for (name-2 value-2) on list-2 by #'cddr
+	  do
+	     (unless (string= value-1 value-2)
+		 (push name-1 result)
+		 (push value-2 result)))
+    (nreverse result)))
+
+(defun row-indentical (list-1 list-2)
+  "ASSUME:  list-1 and list-2 are plists
+   ASSUME:  The plists have identical keys and differ only in value
+   RETURNS: key value if the are the same in both lists"
+  (let ((result))
+    (loop for (name-1 value-1) on list-1 by #'cddr
+	  for (name-2 value-2) on list-2 by #'cddr
+	  do
+	     (when (string= value-1 value-2)
+		 (push name-1 result)
+		 (push value-2 result)))
+    (nreverse result)))
+
+(defun key-to-sym (val)
+  (if (symbolp val)
+      (list 'quote (intern (symbol-name val)))
+      val))
+
+(defun row-equal (plist)
+  (loop for (key value) on plist by #'cddr
+	collect `(:= ',key ,value)))
+
+(defun store-table (table-name pre-change post-change)
+  "Input a alist: '((table-name . table) (field . value) ...))
+  Stores table in database using update."
+  ;; Match against the things that are the same and change the things that are different.. DUH!
+  ;; 1. Nothing changed - finished!
+  ;; 2 Everything has changed
+  ;; 2.1 now a insert-into table
+  ;; 3. Something changed
+  ;; 3.1 The row has a key
+  ;; 3.2 the key hasn't changed
+  ;; 3.3 simplified update with selection on key
+  ;; 4.0 Fallback select on all identical row values update all changed row values
+  (let ((different (mapcar #'key-to-sym (row-difference pre-change post-change)))
+	(same (mapcar #'key-to-sym (row-indentical pre-change post-change)))
+	(tabnam (intern (string-upcase table-name))))
+    (cond ((null different) nil)           ;; nothing different
+	  ((= (length different) (length same)) ;; everything changed
+	   (execute (sql (concatenate 'list `(:insert-into ',tabnam :set) same))))
+	  (t
+	   (execute
+	    (sql (concatenate
+		  'list `(:update ',tabnam :set) different `(:where (:and ,@(row-equal same))))))))))

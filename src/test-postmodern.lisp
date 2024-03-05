@@ -37,13 +37,18 @@
       (:p "Did you delete the browser cache?")))
     (with-footer)))
 
-(hunchentoot:define-easy-handler (form-update :uri "/form-update") (table-name)
+()
+
+(hunchentoot:define-easy-handler (form-update :uri "/form-update") ()
   :request-type :POST
-  (hunchentoot:redirect (format nil "/table-view?name=~A" table-name))
-  )
+  (let* ((post-alist (hunchentoot:post-parameters*))
+	 (table-name (cdr (first post-alist))))
+    (web-store-table post-alist (hunchentoot:session-value :form-data *session*))
+    (hunchentoot:redirect (format nil "/table-view?name=~A" table-name))))
 
 (hunchentoot:define-easy-handler (form-view :uri "/form-view") (index)
-  (let* ((form-data (nth (parse-integer index) (hunchentoot:session-value :form-data *session*)))
+  (let* ((nindex (parse-integer index))
+	 (form-data (nth nindex (hunchentoot:session-value :form-data *session*)))
 	 (table-name (getf form-data :table-name))
 	 (row-plist (cddr form-data)))
     (with-page (:title "Table Grinder")
@@ -57,7 +62,7 @@
 		  (format nil "/table-view?name=~A" table-name)
 		  (format nil "Table ~A" (string-upcase table-name))))))
        (:article
-	(with-form table-name "/form-update" row-plist)))
+	(with-form table-name "/form-update" index row-plist)))
       (with-footer))))
 
 (hunchentoot:define-easy-handler (table-view :uri "/table-view") (name)
@@ -83,7 +88,7 @@
        (:li (:a :href "/" "Home"))))
      (:article
       (:ul :class "table"
-	   (dolist (row (list-database-tables))
+	   (dolist (row (pu:list-database-tables))
 	     (:li (:a :href (format nil"table-view?name=~A" row) (string-upcase row)))))))
      (with-footer)))
 
@@ -138,8 +143,7 @@
        (:li "HTML Table listing the records in a table")
        (:li "HTML Form for entering and editing table entries"))
       (:p "Basically CRUD without the cruft..")))
-    (with-footer)
-    ))
+    (with-footer)))
 
 (defun start-web-server ()
   "Start the web server. Reconnects if there is a unconnected webserver in *webserver-acceptor*.
@@ -178,7 +182,7 @@ which matches the database parameter in the function, it will be reconnected.
 Returns boolean on whether the global *database* is now connected."
   (unless *database*
     (setf *database*
-	  (postmodern:connect database database-user database-password
+	  (connect database database-user database-password
 			      host :pooled-p t))))
 
 ;;;----------------------------------------------------------------------

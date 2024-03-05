@@ -3,11 +3,15 @@
 
 (defpackage postmodern-web
   (:shadowing-import-from :utils #:while)
-  (:local-nicknames (:u :utils) (:pu :postmodern-utils) (:ps :parenscript) (:a :alexandria))
-  (:use  #:cl #+sbcl #:sb-ext :iterate :utils :hunchentoot :spinneret :cl-css :postmodern :postmodern-utils)
+  (:shadowing-import-from :sb-ext #:create)
+  (:shadowing-import-from :parenscript #:%)
+  (:local-nicknames (:u :utils) (:pu :postmodern-utils) (:a :alexandria))
+  (:use  #:cl #+sbcl #:sb-ext :hunchentoot :postmodern :parenscript :spinneret :cl-css :cl-interpol)
   (:export :start-web-server :start-db-connection :start-testing :stop-testing))
 
 (in-package :postmodern-web)
+
+(named-readtables:in-readtable :interpol-syntax)
 
 (compile-css
  (merge-pathnames (make-pathname :name "style" :type "css" :directory '(:relative "www"))
@@ -91,12 +95,27 @@
 
 (defun make-keyword (name) (values (intern (string-upcase name) "KEYWORD")))
 
-(defmacro with-form (table-name table-action row-plist)
+(defun web-store-table (post-alist session-parameters)
+  (let* ((table-name (cdr (first post-alist)))
+	 (index (parse-integer (cdr (second post-alist))))
+	 (pre-change-up (cddr (nth index session-parameters)))
+	 (table-types (mapcar #'second (table-description (intern table-name))))
+	 (pre-change (loop for (name value) on pre-change-up by #'cddr
+			   for type in table-types
+			   collect name
+			   collect (present type value)))
+	 (post-change (loop for (name . val) in (cddr post-alist) ; skip table-name and index entries
+			    collect (intern (string-upcase name) "KEYWORD")
+			    collect val)))
+    (pu:store-table table-name pre-change post-change)))
+
+(defmacro with-form (table-name table-action index row-plist)
   `(let ((table-desc (table-description (intern ,table-name))))
      (with-html
-       (:form :action ,table-action
+       (:form :action ,table-action :method "POST"
 	      (:table
 	       (:input :type "hidden" :id "table-name" :name "table-name" :value ,table-name)
+	       (:input :type "hidden" :id "index" :name "index" :value ,index)
 	       (dolist (col table-desc)
 		 (let* ((name (first col))
 			(type (second col))
@@ -138,6 +157,11 @@
 			  (nreverse form-data)
 			  (list :table-name name))))
      (with-html
+       (with-ps
+	 (wait-doc ; wait til page is finished drawing
+	   (chain ($ "tr:gt(0)") ; assign a click callback to each row except the first
+		  (click (lambda () ; set page to the element with the link <a class="form"...>'s href
+			   (setf (@ window location href) (chain ($ this) (find "a.form") (attr "href"))))))))
        (:table :id "db"
 	       (:tr
 		(dolist (col table-desc)
@@ -163,6 +187,11 @@
 				      (cond ((numeric? type) (:td :class "numeric" value))
 					    ((datetime? type) (:td (:time :datetime value value)))
 					    (t (:td value))))))))))))
+(defmacro with-ps (&body body)
+  `(with-html (:script (:raw (ps ,body)))))
+
+(defpsmacro wait-doc (&body body)
+  `(chain ($ document) (ready (lambda () ,body))))
 
 (defmacro with-page ((&key title) &body body)
   `(progn
@@ -177,7 +206,8 @@
 	   (:meta :name "viewport" :content "width=device-width, initial-scale=1")
 	   (:link :rel "icon" :type "image/x-icon" :href "/img/favicon.ico")
 	   (:link :rel "stylesheet" :href "style.css")
-	   (:script :src "tables.js"))
+	   ;; https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js is you don't wan't to download it
+	   (:script :src "jquery-3.7.1.min.js"))
 	  (:body ,@body))))))
 
 (defmacro with-footer ()
@@ -190,7 +220,7 @@
 		  hunchentoot:*hunchentoot-version*
 		  (lisp-implementation-type)
 		  (subseq (lisp-implementation-version) 0 6)
-		  (subseq (pomo:database-version) 0 16))
+		  (subseq (database-version) 0 16))
 	  (format nil " ~A running on ~A ~A"
 		  hunchentoot:*hunchentoot-version*
 		  (lisp-implementation-type)

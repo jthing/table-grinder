@@ -5,7 +5,8 @@
   :license "MIT"
   :depends-on (:cl-package-locks :hh-redblack :inferior-shell :alexandria
 	       :postmodern :simple-date :simple-date/postgres-glue
-	       :hunchentoot :spinneret :cl-css :parenscript)
+	       :hunchentoot :spinneret :spinneret/ps :cl-css :parenscript
+	       :cl-interpol)
   :components ((:module "src"
                 :components
                 ((:file "utils")

@@ -7,3 +7,6 @@
 *.x86f
 *~
 .#*
+jquery-3.7.1.js
+jquery-3.7.1.min.js
+
