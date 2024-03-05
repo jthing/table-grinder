@@ -562,33 +562,44 @@ either quoted or string."
     (nreverse result)))
 
 (defun key-to-sym (val)
+  ":SYMBOL => 'SYMBOL"
   (if (symbolp val)
       (list 'quote (intern (symbol-name val)))
       val))
 
 (defun row-equal (plist)
+  "(key1 val1...) => ((:= key1 val1) ...)"
   (loop for (key value) on plist by #'cddr
-	collect `(:= ',key ,value)))
+	collect `(:= ,key ,value)))
 
 (defun store-table (table-name pre-change post-change)
-  "Input a alist: '((table-name . table) (field . value) ...))
-  Stores table in database using update."
-  ;; Match against the things that are the same and change the things that are different.. DUH!
-  ;; 1. Nothing changed - finished!
-  ;; 2 Everything has changed
-  ;; 2.1 now a insert-into table
-  ;; 3. Something changed
-  ;; 3.1 The row has a key
-  ;; 3.2 the key hasn't changed
-  ;; 3.3 simplified update with selection on key
-  ;; 4.0 Fallback select on all identical row values update all changed row values
+  "INPUT: table-name,
+          pre-change  - values before change as a plist of field-name, value pairs
+          post-change - values after editing form as a plist of field-name, value pairs
+
+  Stores table in database using update or insert-into if all field are new.
+
+  Match against the things that are the same and change the things that are different.. DUH!
+  1. Nothing changed - finished!
+  2 Everything has changed
+  2.1 now a insert-into table
+  3. Something changed
+  3.1 The row has a key
+  3.2 the key hasn't changed
+  3.3 simplified update with selection on key
+  4.0 Fallback select on all identical row values update all changed row values
+
+  RETURNS: table-name entry is updated with the fields that have changed from pre-change to post-change.
+"
   (let ((different (mapcar #'key-to-sym (row-difference pre-change post-change)))
 	(same (mapcar #'key-to-sym (row-indentical pre-change post-change)))
 	(tabnam (intern (string-upcase table-name))))
-    (cond ((null different) nil)           ;; nothing different
-	  ((= (length different) (length same)) ;; everything changed
-	   (execute (sql (concatenate 'list `(:insert-into ',tabnam :set) same))))
-	  (t
+    (cond ((null different) nil)           ; nothing different
+	  ((= (length different) (length same)) ; everything changed
+	   (execute (sql-compile (concatenate 'list `(:insert-into ',tabnam :set) same))))
+	  (() ; row has key
+	   )
+	  (t ; Fallback
 	   (execute
-	    (sql (concatenate
+	    (sql-compile (concatenate
 		  'list `(:update ',tabnam :set) different `(:where (:and ,@(row-equal same))))))))))

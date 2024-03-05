@@ -21,24 +21,6 @@
   (start-testing)
   (hunchentoot:redirect "/"))
 
-(hunchentoot:define-easy-handler (cookie-error :uri "/cookie-error") ()
-  (with-page (:title "Cookie Error")
-    (:header
-     (:h1 "Cookie Error")
-     (:h2 "I've lost my Cookies.. Have you seem my cookies?"))
-    (:section
-     (:nav
-      (:menu
-       (:li (:a :href "/restart-table-grinder" "Restart"))))
-     (:article
-      (:img :src "/img/cookie-monster.jpg" :alt "Picture of cookie monster.")
-      (:p "I have lost my session cookies and have no idea what I was doing.")
-      (:p "My only choice is to restart and you must log in again! Sorry..")
-      (:p "Did you delete the browser cache?")))
-    (with-footer)))
-
-()
-
 (hunchentoot:define-easy-handler (form-update :uri "/form-update") ()
   :request-type :POST
   (let* ((post-alist (hunchentoot:post-parameters*))

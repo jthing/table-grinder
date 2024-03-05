@@ -36,13 +36,79 @@ Then you need to setup the program.
 - Open file main.lisp and press C-c ~
 - From sly:
   - # (pw:start-testing)
-  - # (make-sample-database)
 - In the browser open localhost:4242
 
 When you are finished type (pw:stop-testing)
 
 ** Usage
 
+Nav bar is on the left and clickable. If all is gone well you should
+Login Database in the Nav bar. Click it and enter you username and
+password.
+
+Nav bar now shows IBM_SAMPLE. The sample database should be
+automatically created.  Click to see the list of tables.
+
+Tables are also clickable. Pick one 'say EMPLOYEE' and take a look
+at the table listing.
+
+Table entries are clickable anywhere on the line will do. To go back
+use the Nav bar on the left. If you click the table entry You enter
+the form page.
+
+All entries in the form are editable and you commit the changes by
+pressing to submit button. To go back use the Nav bar us usual.
+
+WARNING! This is a IBM training database originally for DB2. It is by
+design of bad quality. You can probably learn a lot by cleaning up the
+design, butthat is not part of this demo.
+
+** Program design
+
+Directory layout:
+
+table-grinder/
+├── data
+│   ├── emp_photo
+│   ├── emp_resyme
+│   └── xml
+├── src
+├── tests
+└── www
+    ├── errors
+    └── img
+
+Data is auxiliary data used by the database.
+www contains error templates and images. CSS is generated and stored
+under www. The lisp code is under src.
+
+Key files:
+
+test-postmodern.list - the entry point of the application
+  Contains the veneer of the web pages.
+
+postmodern-web.lisp - This does the heavy lifting of the
+application. It generates the CSS, enables parenscript and augments
+table navigation, Generates tables and forms based on the content
+found in the database tables.
+
+postmodern-utils.lisp it started as code from
+https://sites.google.com/site/sabraonthehill/postmodern-examples
+It contains numerous utilities to improve introspection into the
+PostgreSQL databases.
+It also contains my code for store-table which stores updates from
+the form to the database.
+
+sample-database.lisp - The code that generates the database. The code
+is indepotent so to recreate the database just drop the database and
+run (make-sample-database). It will just recreate the parts that have
+changed so if you just drop a table only that will be created when
+run. Based on
+[[https://www.ibm.com/docs/en/db2/11.5?topic=samples-sample-database]]
+
+
+Thanks to joshrr from #commonlisp at irc.libera.chat for much help long the way.
 
 #  LocalWords:  postgresql sudo postgres psql dir src pw localhost
-#  LocalWords:  REPL CLOS png WebPage
+#  LocalWords:  REPL CLOS png WebPage Nav img xml www parenscript irc
+#  LocalWords:  utils resyme indepotent joshrr commonlisp libera

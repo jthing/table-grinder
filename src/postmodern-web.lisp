@@ -96,6 +96,18 @@
 (defun make-keyword (name) (values (intern (string-upcase name) "KEYWORD")))
 
 (defun web-store-table (post-alist session-parameters)
+  "INPUT: post-alist - alist returned by with-form POST
+          session-parameters - session data from with-table at the index given to with-form
+
+  post-alist is converted to a plist
+  post-parametes are parsed and the value data type converted to a string simular to the values in the alist
+
+  Marshal the data into:
+  table-name
+  plist of data record as before entering the form
+  plist of data record after pressing submit at the form
+
+  pu:store-table stores the row in the table"
   (let* ((table-name (cdr (first post-alist)))
 	 (index (parse-integer (cdr (second post-alist))))
 	 (pre-change-up (cddr (nth index session-parameters)))
