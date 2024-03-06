@@ -67,16 +67,20 @@ design, butthat is not part of this demo.
 
 Directory layout:
 
-table-grinder/
-├── data
-│   ├── emp_photo
-│   ├── emp_resyme
-│   └── xml
-├── src
-├── tests
-└── www
-    ├── errors
-    └── img
+#+begin_src picture-mode
+
+  table-grinder/
+  ├── data
+  │   ├── emp_photo
+  │   ├── emp_resyme
+  │   └── xml
+  ├── src
+  ├── tests
+  └── www
+      ├── errors
+      └── img
+
+#+end_src
 
 Data is auxiliary data used by the database.
 www contains error templates and images. CSS is generated and stored
