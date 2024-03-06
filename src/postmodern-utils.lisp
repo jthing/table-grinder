@@ -595,8 +595,8 @@ either quoted or string."
 	(same (mapcar #'key-to-sym (row-indentical pre-change post-change)))
 	(tabnam (intern (string-upcase table-name))))
     (cond ((null different) nil)           ; nothing different
-	  ((= (length different) (length same)) ; everything changed
-	   (execute (sql-compile (concatenate 'list `(:insert-into ',tabnam :set) same))))
+	  ((= (length same) 0) ; everything changed
+	   (execute (sql-compile (concatenate 'list `(:insert-into ',tabnam :set) different))))
 	  (() ; row has key
 	   )
 	  (t ; Fallback
