@@ -20,8 +20,9 @@ On Ubuntu that would be:
 - sudo apt install postgresql.
 - sudo -u postgres psql template1
 - ALTER USER postgres with encrypted password 'your_password';
-- ADD USER 'your name' with encrypted password 'your_password';
-- CREATED DATABASE 'your_name' with owner='your_name';
+- CREATE USER your_name with encrypted password 'your_password';
+- CREATED DATABASE your_name with owner=your_name;
+- GRANT ALL privileges on your_name to your_name;
 
 From the command line you can now write plain psql.
 This will log you inn as your username into the database with your name.
@@ -29,7 +30,7 @@ Then you need to setup the program.
   
 - Open file <install-dir>/src/test-postmodern.lisp
   From REPL:
-  - (asdf:system-source-directory (asdf:find-system "table-grinder"))
+  - (asdf:system-source-directory (asdf:find-system :table-grinder))
   Returns the directory where the source is installed.
 - Start Slime/Sly.
 - Change the entries *default-database* and *default-user* to your user.
@@ -61,7 +62,7 @@ pressing to submit button. To go back use the Nav bar us usual.
 
 WARNING! This is a IBM training database originally for DB2. It is by
 design of bad quality. You can probably learn a lot by cleaning up the
-design, butthat is not part of this demo.
+design, but that is not part of this demo.
 
 ** Program design
 
