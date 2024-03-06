@@ -218,8 +218,7 @@
 	   (:meta :name "viewport" :content "width=device-width, initial-scale=1")
 	   (:link :rel "icon" :type "image/x-icon" :href "/img/favicon.ico")
 	   (:link :rel "stylesheet" :href "style.css")
-	   ;; https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js is you don't wan't to download it
-	   (:script :src "jquery-3.7.1.min.js"))
+	   (:script :src "https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"))
 	  (:body ,@body))))))
 
 (defmacro with-footer ()
