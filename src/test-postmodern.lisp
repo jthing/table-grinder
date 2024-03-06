@@ -186,7 +186,8 @@ Returns boolean on whether the global *database* is now connected."
 ;;; Setup entry point
 
 (defun make-sample-database ()
-  (load "sample-database.lisp"))
+  (load (merge-pathnames (make-pathname :name "sample-database" :type"lisp" :directory '(:relative "src"))
+			 (asdf:system-source-directory "table-grinder"))))
 
   
 (defun start-testing ()

@@ -22,7 +22,7 @@ On Ubuntu that would be:
 - ALTER USER postgres with encrypted password 'your_password';
 - CREATE USER your_name with encrypted password 'your_password';
 - CREATED DATABASE your_name with owner=your_name;
-- GRANT ALL privileges on your_name to your_name;
+- ALTER USER your-name with superuser;
 
 From the command line you can now write plain psql.
 This will log you inn as your username into the database with your name.
