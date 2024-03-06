@@ -28,24 +28,39 @@
     (web-store-table post-alist (hunchentoot:session-value :form-data *session*))
     (hunchentoot:redirect (format nil "/table-view?name=~A" table-name))))
 
+(hunchentoot:define-easy-handler (cookie-error :uri "/cookie-error") ()
+  (with-page (:title "Cookie Error")
+    (:header
+     (:h1 "Cookie Error")
+     (:h2 "Session Cookie missing or expired"))
+    (:section
+     (:nav
+      (:menu
+       (:li (:a :href "/database-tables" "Database Tables"))))
+     (:article
+      (:p "Hunchentoot will regenerate the session cookie for you. Sending you back to Database Tables.")))
+    (with-footer)))
+
 (hunchentoot:define-easy-handler (form-view :uri "/form-view") (index)
-  (let* ((nindex (parse-integer index))
-	 (form-data (nth nindex (hunchentoot:session-value :form-data *session*)))
-	 (table-name (getf form-data :table-name))
-	 (row-plist (cddr form-data)))
-    (with-page (:title "Table Grinder")
-      (:header
-       (:h1 (string-upcase (getf form-data :table-name)))
-       (:h2 "Create Read Update Delete"))
-      (:section
-       (:nav  
-	(:menu
-	 (:li (:a :href
-		  (format nil "/table-view?name=~A" table-name)
-		  (format nil "Table ~A" (string-upcase table-name))))))
-       (:article
-	(with-form table-name "/form-update" index row-plist)))
-      (with-footer))))
+  (handler-case
+      (let* ((nindex (parse-integer index))
+	     (form-data (nth nindex (hunchentoot:session-value :form-data *session*)))
+	     (table-name (getf form-data :table-name))
+	     (row-plist (cddr form-data)))
+	(with-page (:title "Table Grinder")
+	  (:header
+	   (:h1 (string-upcase (getf form-data :table-name)))
+	   (:h2 "Create Read Update Delete"))
+	  (:section
+	   (:nav  
+	    (:menu
+	     (:li (:a :href
+		      (format nil "/table-view?name=~A" table-name)
+		      (format nil "Table ~A" (string-upcase table-name))))))
+	   (:article
+	    (with-form table-name "/form-update" index row-plist)))
+	  (with-footer)))
+      (type-error () (hunchentoot:redirect "/cookie-error"))))
 
 (hunchentoot:define-easy-handler (table-view :uri "/table-view") (name)
   (with-page (:title "Table Grinder")
