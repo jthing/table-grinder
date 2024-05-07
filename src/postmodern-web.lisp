@@ -2,10 +2,9 @@
 ;;;; 07.02.2024 John Thingstad
 
 (defpackage postmodern-web
-  (:shadowing-import-from :utils #:while)
   (:shadowing-import-from :sb-ext #:create)
   (:shadowing-import-from :parenscript #:%)
-  (:local-nicknames (:u :utils) (:pu :postmodern-utils) (:a :alexandria))
+  (:local-nicknames (:pu :postmodern-utils) (:a :alexandria))
   (:use  #:cl #+sbcl #:sb-ext :hunchentoot :postmodern :parenscript :spinneret :cl-css :cl-interpol)
   (:export :start-web-server :start-db-connection :start-testing :stop-testing))
 

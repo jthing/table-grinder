@@ -3,15 +3,13 @@
   :version "0.0.1"
   :author "John Thingstad <jpthing@online.no>"
   :license "MIT"
-  :depends-on (:cl-package-locks :hh-redblack :inferior-shell :alexandria
-	       :postmodern :simple-date :simple-date/postgres-glue
+  :depends-on (:alexandria :postmodern :simple-date :simple-date/postgres-glue
 	       :hunchentoot :spinneret :spinneret/ps :cl-css :parenscript
 	       :cl-interpol)
   :components ((:module "src"
                 :components
-                ((:file "utils")
-		 (:file "postmodern-utils" :depends-on ("utils"))
-		 (:file "postmodern-web"   :depends-on ("utils"))
+                ((:file "postmodern-utils")
+		 (:file "postmodern-web")
 		 (:file "test-postmodern"  :depends-on ("postmodern-web" "postmodern-utils"))
 		 (:file "main"             :depends-on ("test-postmodern")))))
   :description "Table Grinder for Postmodern and Hunchentoot 14/2-2024"

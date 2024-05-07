@@ -3,7 +3,8 @@
 ;;;; 07.02.2024 John Thingstad
 
 (defpackage postmodern-utils
-  (:use :cl :utils :postmodern)
+  (:use :cl :alexandria :postmodern)
+  (:local-nicknames (:a :alexandria))
   (:export
    :store-table :table-row-names
    :normalize-for-sql :make-list-query :database-version :list-databases :list-databases-and-sizes
@@ -18,7 +19,6 @@
 
 (in-package :postmodern-utils)
 (use-package :postmodern)
-(use-package :utils)
 
 (defmacro table-row-names (table)
   `(iter (for row in (table-description-menu ,table))
@@ -45,7 +45,7 @@ sequences, and views."
 (defun list-databases ()
   "This list drops the first two template databases"
   (let ((all-databases
-	  (flatten
+	  (a:flatten
 	   (query
 	    (:order-by
 	     (:select 'datname
@@ -502,13 +502,13 @@ either quoted or string."
 	(when (symbolp table-name)   
 	  (setf table-name  (string-downcase (write-to-string table-name))))
 	(when (table-exists-p table-name)
-	  (flatten (query
+	  (a:flatten (query
 		    (:select (:as 'trg.tgname 'trigger-name)
 		      :from (:as 'pg-trigger 'trg) (:as 'pg-class 'tbl)
 		      :where (:and (:= 'trg.tgrelid 'tbl.oid)
 				   (:= 'tbl.relname '$1)))
 		    table-name))))
-      (flatten (query
+      (a:flatten (query
 		(:select 'trigger-name :distinct
 		  :from 'information-schema.triggers
 		  :where

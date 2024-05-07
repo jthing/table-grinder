@@ -13,8 +13,6 @@
 (defparameter *database-user* "john")
 (defparameter *database-password* "")
 
-;;;----------------------------------------------------------------------
-;;; Webserver
 
 (hunchentoot:define-easy-handler (restart-table-grinder :uri "/restart-table-grinder") ()
   (stop-testing)
@@ -123,6 +121,8 @@
 (hunchentoot:define-easy-handler (root-web-page :uri "/") ()
   (with-page (:title "Table Grinder")
     (:header
+     (:p
+      (:img :src "img/lisp-logo.jpg" :alt "Lisp Logo" :width "150px" :height "100px" :style "float:left"))
      (:h1 "Table Grinder for Postmodern and Hunchentoot"))
     (:section
      (:nav
